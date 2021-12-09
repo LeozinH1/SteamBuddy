@@ -21,11 +21,19 @@ import {
   List,
 } from "../styles/pages/dashboard";
 
+interface FriendsSelectedProps {
+  steamid: string;
+  name: string;
+  avatar: string;
+}
+
 const Dashboard: NextPage = () => {
   const router = useRouter();
 
   const [userData, setUserData] = useState();
-  const [userFriends, setUserFriends] = useState();
+
+  const [userFriends, setUserFriends] = useState([]);
+  const [friendsSelected, setFriendsSelected] = useState([]);
 
   useEffect(() => {
     const getUserData = async () => {
@@ -45,6 +53,18 @@ const Dashboard: NextPage = () => {
     getUserFriends();
   }, [router]);
 
+  const addFriend = (steamid) => {
+    setFriendsSelected([...friendsSelected, steamid]);
+    setUserFriends(userFriends.filter((item) => item.steamid !== steamid));
+  };
+
+  const removeFriend = (steamid) => {
+    setUserFriends([...userFriends, steamid]);
+    setFriendsSelected(
+      friendsSelected.filter((item) => item.steamid !== steamid)
+    );
+  };
+
   return (
     <>
       <Header />
@@ -62,26 +82,31 @@ const Dashboard: NextPage = () => {
               <List>
                 {userFriends &&
                   userFriends.map((friend) => (
-                    <ListItem steamid={friend.steamid} key={friend.steamid} />
+                    <>
+                      <ListItem steamid={friend.steamid} key={friend.steamid} />
+                      <button onClick={() => addFriend(friend.steamid)}>
+                        ADD
+                      </button>
+                    </>
                   ))}
               </List>
             </FriendsList>
             <ContentRight>
               <FriendsSelected>
-                <h3 className="title">13 Amigo(s) Selecionado(s)</h3>
+                <h3 className="title">
+                  {friendsSelected?.length || 0} Amigo(s) Selecionado(s)
+                </h3>
                 <div className="custom-list">
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
-                  <PlayerSelected name="LeozinH1" />
+                  {friendsSelected &&
+                    friendsSelected.map((friend) => (
+                      <PlayerSelected
+                        name={friend.name}
+                        avatar={"nulkl"}
+                        steamid={friend.steamid}
+                        key={friend.steamid}
+                        removeFriend={removeFriend}
+                      />
+                    ))}
                 </div>
               </FriendsSelected>
               <CommonGames>

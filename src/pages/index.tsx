@@ -12,8 +12,33 @@ import { useRef } from "react";
 
 const Home: NextPage = () => {
   const inputRef = useRef<HTMLInputElement>();
-  const handleClick = () => {
-    if (inputRef.current) Router.push(inputRef.current.value);
+
+  const getUserId = async (string: string) => {
+    const url_array = string.split("/");
+
+    const getProfilesId = url_array.findIndex((el) => el === "profiles") + 1;
+    if (getProfilesId) return url_array[getProfilesId];
+
+    const getCustomId = url_array.findIndex((el) => el === "id") + 1;
+    if (getCustomId) {
+      let profilesid = await fetch(
+        `api/resolveVanityUrl/${url_array[getCustomId]}`
+      );
+      profilesid = await profilesid.json();
+
+      return profilesid.userid;
+    }
+
+    return string;
+  };
+
+  const handleClick = async () => {
+    if (inputRef.current) {
+      const inputValue = inputRef.current.value;
+      getUserId(inputValue).then((res) => {
+        Router.push(`/${res}`);
+      });
+    }
   };
 
   return (
@@ -24,7 +49,10 @@ const Home: NextPage = () => {
         <Start>
           <h2>Seu SteamID</h2>
 
-          <Input ref={inputRef} />
+          <Input
+            ref={inputRef}
+            placeholder="https://steamcommunity.com/id/your_id"
+          />
 
           <Button className="continue" onClick={handleClick}>
             Continuar
