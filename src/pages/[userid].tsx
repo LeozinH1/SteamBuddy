@@ -29,7 +29,6 @@ interface FriendProps {
 }
 
 import { Remove, CloseIcon } from "../components/PlayerSelectedItem/style";
-import { resolve } from "path";
 
 const Dashboard: NextPage = () => {
   const router = useRouter();
@@ -54,6 +53,7 @@ const Dashboard: NextPage = () => {
   useEffect(() => {
     getUserData(router.query.userid).then((res) => {
       setUserData(res);
+      addFriend(res);
     });
 
     getUserFriends(router.query.userid).then((res) => {
@@ -98,39 +98,32 @@ const Dashboard: NextPage = () => {
     setGames(games.filter((el) => el.steamid !== friend.steamid));
   };
 
-  const findDuplicates = (arr) => {
-    let sorted_arr = arr.slice().sort();
-    let results = [];
-    for (let i = 0; i < sorted_arr.length - 1; i++) {
-      if (sorted_arr[i + 1] == sorted_arr[i]) {
-        results.push(sorted_arr[i]);
-      }
-    }
-    return results;
-  };
-
   const filterGames = useMemo(() => {
+    //////////////////////////////////////////
     let allgames = games.reduce((acc, obj) => {
       acc.push(obj.games);
       return acc.flat();
     }, []);
 
-    let gamesid = allgames.reduce((acc, obj) => {
-      acc.push(obj.appid);
-      return acc;
+    //////////////////////////////////////////
+    const sameGames = allgames.reduce((games, game) => {
+      if (
+        allgames.filter((el) => game.appid == el.appid).length ==
+        friendsSelected.length
+      ) {
+        games.push(game);
+      }
+      return games;
     }, []);
 
-    let sameGames = findDuplicates(gamesid);
+    //////////////////////////////////////////
+    const uniqueGames = Array.from(new Set(sameGames.map((a) => a.appid))).map(
+      (id) => {
+        return sameGames.find((a) => a.appid === id);
+      }
+    );
 
-    const miau = sameGames.map((el) => {
-      const teste = allgames.find((fnd) => {
-        return fnd.appid == el;
-      });
-
-      return teste;
-    });
-
-    return miau;
+    return uniqueGames;
   }, [games]);
 
   const [search, setSearch] = useState("");
@@ -142,6 +135,19 @@ const Dashboard: NextPage = () => {
       return el.personaname.toLowerCase().includes(search.toLowerCase());
     });
   }, [search, friendsList]);
+
+  const compare = (a, b) => {
+    const player1 = a.personaname.toUpperCase();
+    const player2 = b.personaname.toUpperCase();
+
+    let comparison = 0;
+    if (player1 > player2) {
+      comparison = 1;
+    } else if (player1 < player2) {
+      comparison = -1;
+    }
+    return comparison;
+  };
 
   return (
     <>
@@ -162,7 +168,7 @@ const Dashboard: NextPage = () => {
               />
               <List>
                 {myfriends.length > 0 ? (
-                  myfriends.map((friend) => (
+                  myfriends.sort(compare).map((friend) => (
                     <>
                       <button
                         onClick={() => addFriend(friend)}
@@ -198,9 +204,11 @@ const Dashboard: NextPage = () => {
                         avatar={friend.avatarmedium}
                         key={friendsSelected.steamid}
                       >
-                        <Remove onClick={() => removeFriend(friend)}>
-                          <CloseIcon />
-                        </Remove>
+                        {friend.steamid !== userData.steamid && (
+                          <Remove onClick={() => removeFriend(friend)}>
+                            <CloseIcon />
+                          </Remove>
+                        )}
                       </PlayerSelected>
                     ))}
                 </div>
