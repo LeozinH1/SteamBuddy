@@ -10,7 +10,7 @@ const ListItem: React.FC<CompProps> = ({ photo, name }) => {
   return (
     <Wrapper>
       <PlayerPhoto>
-        <Image src={photo} layout="fill" objectFit="cover" alt="User Avatar" />
+        <Image src={photo} layout="fill" objectFit="cover" alt="Photo" />
       </PlayerPhoto>
       {name}
     </Wrapper>

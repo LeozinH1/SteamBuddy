@@ -10,6 +10,7 @@ import Input from "../components/Input";
 import { useRouter } from "next/router";
 
 import { Wellcome } from "../styles/pages/dashboard";
+import Link from "next/link";
 
 import {
   Content,
@@ -28,6 +29,7 @@ interface FriendProps {
 }
 
 import { Remove, CloseIcon } from "../components/PlayerSelectedItem/style";
+import { resolve } from "path";
 
 const Dashboard: NextPage = () => {
   const router = useRouter();
@@ -59,6 +61,14 @@ const Dashboard: NextPage = () => {
     });
   }, [router]);
 
+  const getUserGames = async (steamid) => {
+    let req = await fetch(`api/getUserGames/${steamid}`);
+    req = await req.json();
+    return req;
+  };
+
+  const [games, setGames] = useState([]);
+
   const addFriend = (friend) => {
     const exists = friendsSelected.find(
       (element) => element.steamid == friend.steamid
@@ -69,6 +79,14 @@ const Dashboard: NextPage = () => {
       setFriendsList(
         friendsList.filter((friend2) => friend2.steamid !== friend.steamid)
       );
+
+      getUserGames(friend.steamid).then((res) => {
+        const teste = {
+          steamid: friend.steamid,
+          games: res,
+        };
+        setGames([...games, teste]);
+      });
     }
   };
 
@@ -77,7 +95,43 @@ const Dashboard: NextPage = () => {
       friendsSelected.filter((player) => player.steamid !== friend.steamid)
     );
     setFriendsList([...friendsList, friend]);
+    setGames(games.filter((el) => el.steamid !== friend.steamid));
   };
+
+  const findDuplicates = (arr) => {
+    let sorted_arr = arr.slice().sort();
+    let results = [];
+    for (let i = 0; i < sorted_arr.length - 1; i++) {
+      if (sorted_arr[i + 1] == sorted_arr[i]) {
+        results.push(sorted_arr[i]);
+      }
+    }
+    return results;
+  };
+
+  const filterGames = useMemo(() => {
+    let allgames = games.reduce((acc, obj) => {
+      acc.push(obj.games);
+      return acc.flat();
+    }, []);
+
+    let gamesid = allgames.reduce((acc, obj) => {
+      acc.push(obj.appid);
+      return acc;
+    }, []);
+
+    let sameGames = findDuplicates(gamesid);
+
+    const miau = sameGames.map((el) => {
+      const teste = allgames.find((fnd) => {
+        return fnd.appid == el;
+      });
+
+      return teste;
+    });
+
+    return miau;
+  }, [games]);
 
   const [search, setSearch] = useState("");
 
@@ -153,9 +207,21 @@ const Dashboard: NextPage = () => {
               </FriendsSelected>
               <CommonGames>
                 <h3 className="title">
-                  <span>24</span> Jogo(s) em Comum
+                  <span>{filterGames.length}</span> Jogo(s) em Comum
                 </h3>
-                <List></List>
+                <List>
+                  {filterGames &&
+                    filterGames.map((game) => (
+                      <Link href={`steam://run/${game.appid}`} key={game.appid}>
+                        <a>
+                          <ListItem
+                            name={game.name}
+                            photo={`https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`}
+                          />
+                        </a>
+                      </Link>
+                    ))}
+                </List>
               </CommonGames>
             </ContentRight>
           </Content>
