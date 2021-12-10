@@ -15,6 +15,8 @@ export const PlayerAvatar = styled.div`
   height: 50px;
   background: ${(props) => props.theme.colors.gray2};
   border-radius: 50%;
+  position: relative;
+  overflow: hidden;
 `;
 
 export const Remove = styled.button`

@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import { Container } from "../styles/layout";
 import PlayerSelected from "../components/PlayerSelectedItem";
@@ -21,49 +21,73 @@ import {
   List,
 } from "../styles/pages/dashboard";
 
-interface FriendsSelectedProps {
+interface FriendProps {
   steamid: string;
-  name: string;
-  avatar: string;
+  personaname: string;
+  avatarmedium: string;
 }
+
+import { Remove, CloseIcon } from "../components/PlayerSelectedItem/style";
 
 const Dashboard: NextPage = () => {
   const router = useRouter();
 
   const [userData, setUserData] = useState();
 
-  const [userFriends, setUserFriends] = useState([]);
+  const [friendsList, setFriendsList] = useState([]);
   const [friendsSelected, setFriendsSelected] = useState([]);
 
+  const getUserData = async (steamid: any) => {
+    let req = await fetch(`api/getUserData/${steamid}`);
+    req = await req.json();
+    return req;
+  };
+
+  const getUserFriends = async (steamid: any) => {
+    let req = await fetch(`api/getFriendList/${steamid}`);
+    req = await req.json();
+    return req;
+  };
+
   useEffect(() => {
-    const getUserData = async () => {
-      let req = await fetch(`api/getUserData/${router.query.userid}`);
-      req = await req.json();
-      setUserData(req);
-    };
+    getUserData(router.query.userid).then((res) => {
+      setUserData(res);
+    });
 
-    const getUserFriends = async () => {
-      let req = await fetch(`api/getFriendList/${router.query.userid}`);
-      req = await req.json();
-
-      setUserFriends(req);
-    };
-
-    getUserData();
-    getUserFriends();
+    getUserFriends(router.query.userid).then((res) => {
+      setFriendsList(res);
+    });
   }, [router]);
 
-  const addFriend = (steamid) => {
-    setFriendsSelected([...friendsSelected, steamid]);
-    setUserFriends(userFriends.filter((item) => item.steamid !== steamid));
+  const addFriend = (friend) => {
+    const exists = friendsSelected.find(
+      (element) => element.steamid == friend.steamid
+    );
+
+    if (!exists) {
+      setFriendsSelected([...friendsSelected, friend]);
+      setFriendsList(
+        friendsList.filter((friend2) => friend2.steamid !== friend.steamid)
+      );
+    }
   };
 
-  const removeFriend = (steamid) => {
-    setUserFriends([...userFriends, steamid]);
+  const removeFriend = (friend) => {
     setFriendsSelected(
-      friendsSelected.filter((item) => item.steamid !== steamid)
+      friendsSelected.filter((player) => player.steamid !== friend.steamid)
     );
+    setFriendsList([...friendsList, friend]);
   };
+
+  const [search, setSearch] = useState("");
+
+  const myfriends = useMemo(() => {
+    if (!search) return friendsList;
+
+    return friendsList.filter((el) => {
+      return el.personaname.toLowerCase().includes(search.toLowerCase());
+    });
+  }, [search, friendsList]);
 
   return (
     <>
@@ -76,36 +100,54 @@ const Dashboard: NextPage = () => {
           <Content>
             <FriendsList>
               <h3 className="title">
-                {userFriends && userFriends.length} Amigo(s)
+                {friendsList && friendsList.length} Amigo(s)
               </h3>
-              <Input placeholder="Player Name" />
+              <Input
+                placeholder="Player Name"
+                onChange={(e) => setSearch(e.target.value)}
+              />
               <List>
-                {userFriends &&
-                  userFriends.map((friend) => (
+                {myfriends.length > 0 ? (
+                  myfriends.map((friend) => (
                     <>
-                      <ListItem steamid={friend.steamid} key={friend.steamid} />
-                      <button onClick={() => addFriend(friend.steamid)}>
-                        ADD
+                      <button
+                        onClick={() => addFriend(friend)}
+                        style={{
+                          border: "none",
+                          background: "none",
+                          color: "#fff",
+                        }}
+                      >
+                        <ListItem
+                          name={friend.personaname}
+                          photo={friend.avatarmedium}
+                          key={friend.steamid}
+                        />
                       </button>
                     </>
-                  ))}
+                  ))
+                ) : (
+                  <span>Nenhum amigo encontrado.</span>
+                )}
               </List>
             </FriendsList>
             <ContentRight>
               <FriendsSelected>
                 <h3 className="title">
-                  {friendsSelected?.length || 0} Amigo(s) Selecionado(s)
+                  {friendsSelected?.length} Amigo(s) Selecionado(s)
                 </h3>
                 <div className="custom-list">
                   {friendsSelected &&
                     friendsSelected.map((friend) => (
                       <PlayerSelected
-                        name={friend.name}
-                        avatar={"nulkl"}
-                        steamid={friend.steamid}
-                        key={friend.steamid}
-                        removeFriend={removeFriend}
-                      />
+                        name={friend.personaname}
+                        avatar={friend.avatarmedium}
+                        key={friendsSelected.steamid}
+                      >
+                        <Remove onClick={() => removeFriend(friend)}>
+                          <CloseIcon />
+                        </Remove>
+                      </PlayerSelected>
                     ))}
                 </div>
               </FriendsSelected>
@@ -113,17 +155,7 @@ const Dashboard: NextPage = () => {
                 <h3 className="title">
                   <span>24</span> Jogo(s) em Comum
                 </h3>
-                <List>
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                  <ListItem name="Counter Strike:Global Offensive" />
-                </List>
+                <List></List>
               </CommonGames>
             </ContentRight>
           </Content>
