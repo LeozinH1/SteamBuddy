@@ -33,7 +33,7 @@ import { Remove, CloseIcon } from "../components/PlayerSelectedItem/style";
 const Dashboard: NextPage = () => {
   const router = useRouter();
 
-  const [userData, setUserData] = useState();
+  const [userData, setUserData] = useState({});
 
   const [friendsList, setFriendsList] = useState([]);
   const [friendsSelected, setFriendsSelected] = useState([]);
