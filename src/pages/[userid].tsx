@@ -35,7 +35,7 @@ const Dashboard: NextPage = () => {
 
   const [userData, setUserData] = useState({});
 
-  const [friendsList, setFriendsList] = useState([]);
+  const [friendsList, setFriendsList] = useState([] as any);
   const [friendsSelected, setFriendsSelected] = useState([]);
 
   const getUserData = async (steamid: any) => {
@@ -61,7 +61,7 @@ const Dashboard: NextPage = () => {
     });
   }, [router]);
 
-  const getUserGames = async (steamid) => {
+  const getUserGames = async (steamid: any) => {
     let req = await fetch(`api/getUserGames/${steamid}`);
     req = await req.json();
     return req;
@@ -69,7 +69,7 @@ const Dashboard: NextPage = () => {
 
   const [games, setGames] = useState([]);
 
-  const addFriend = (friend) => {
+  const addFriend = (friend: any) => {
     const exists = friendsSelected.find(
       (element) => element.steamid == friend.steamid
     );
@@ -77,7 +77,7 @@ const Dashboard: NextPage = () => {
     if (!exists) {
       setFriendsSelected([...friendsSelected, friend]);
       setFriendsList(
-        friendsList.filter((friend2) => friend2.steamid !== friend.steamid)
+        friendsList.filter((friend2: any) => friend2.steamid !== friend.steamid)
       );
 
       getUserGames(friend.steamid).then((res) => {
@@ -90,7 +90,7 @@ const Dashboard: NextPage = () => {
     }
   };
 
-  const removeFriend = (friend) => {
+  const removeFriend = (friend: any) => {
     setFriendsSelected(
       friendsSelected.filter((player) => player.steamid !== friend.steamid)
     );
@@ -131,12 +131,12 @@ const Dashboard: NextPage = () => {
   const myfriends = useMemo(() => {
     if (!search) return friendsList;
 
-    return friendsList.filter((el) => {
+    return friendsList.filter((el: any) => {
       return el.personaname.toLowerCase().includes(search.toLowerCase());
     });
   }, [search, friendsList]);
 
-  const compare = (a, b) => {
+  const compare = (a: any, b: any) => {
     const player1 = a.personaname.toUpperCase();
     const player2 = b.personaname.toUpperCase();
 
