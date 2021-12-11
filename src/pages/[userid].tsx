@@ -22,10 +22,41 @@ import {
   List,
 } from "../styles/pages/dashboard";
 
-interface FriendProps {
-  steamid: string;
+interface PlayerProps {
+  steamid: number;
+  communityvisibilitystate: number;
+  profilestate: number;
   personaname: string;
+  commentpermission: number;
+  profileurl: string;
+  avatar: string;
   avatarmedium: string;
+  avatarfull: string;
+  avatarhash: string;
+  lastlogoff: number;
+  personastate: number;
+  realname: string;
+  primaryclanid: number;
+  timecreated: number;
+  personastateflags: number;
+  loccountrycode: string;
+}
+
+interface GamesProps {
+  appid: number;
+  name: string;
+  playtime_forever: number;
+  img_icon_url: string;
+  img_logo_url: string;
+  has_community_visible_stats: boolean;
+  playtime_windows_forever: number;
+  playtime_mac_forever: number;
+  playtime_linux_forever: number;
+}
+
+interface CustomGamesProps {
+  steamid: number;
+  games: GamesProps[];
 }
 
 import { Remove, CloseIcon } from "../components/PlayerSelectedItem/style";
@@ -33,43 +64,49 @@ import { Remove, CloseIcon } from "../components/PlayerSelectedItem/style";
 const Dashboard: NextPage = () => {
   const router = useRouter();
 
-  const [userData, setUserData] = useState({});
+  const [userData, setUserData] = useState<PlayerProps>({} as PlayerProps);
 
-  const [friendsList, setFriendsList] = useState([] as any);
-  const [friendsSelected, setFriendsSelected] = useState([]);
+  const [friendsList, setFriendsList] = useState<PlayerProps[]>(
+    [] as PlayerProps[]
+  );
+  const [friendsSelected, setFriendsSelected] = useState<PlayerProps[]>(
+    [] as PlayerProps[]
+  );
 
-  const getUserData = async (steamid: any) => {
+  const getUserData = async (steamid: string) => {
     let req = await fetch(`api/getUserData/${steamid}`);
     req = await req.json();
     return req;
   };
 
-  const getUserFriends = async (steamid: any) => {
+  const getUserFriends = async (steamid: string) => {
     let req = await fetch(`api/getFriendList/${steamid}`);
     req = await req.json();
     return req;
   };
 
   useEffect(() => {
-    getUserData(router.query.userid).then((res) => {
+    getUserData(String(router.query.userid)).then((res: any) => {
       setUserData(res);
       addFriend(res);
     });
 
-    getUserFriends(router.query.userid).then((res) => {
+    getUserFriends(String(router.query.userid)).then((res: any) => {
       setFriendsList(res);
     });
   }, [router]);
 
-  const getUserGames = async (steamid: any) => {
+  const getUserGames = async (steamid: string) => {
     let req = await fetch(`api/getUserGames/${steamid}`);
     req = await req.json();
     return req;
   };
 
-  const [games, setGames] = useState([]);
+  const [games, setGames] = useState<CustomGamesProps[]>(
+    [] as CustomGamesProps[]
+  );
 
-  const addFriend = (friend: any) => {
+  const addFriend = (friend: PlayerProps) => {
     const exists = friendsSelected.find(
       (element) => element.steamid == friend.steamid
     );
@@ -80,8 +117,8 @@ const Dashboard: NextPage = () => {
         friendsList.filter((friend2: any) => friend2.steamid !== friend.steamid)
       );
 
-      getUserGames(friend.steamid).then((res) => {
-        const teste = {
+      getUserGames(String(friend.steamid)).then((res: any) => {
+        const teste: CustomGamesProps = {
           steamid: friend.steamid,
           games: res,
         };
@@ -90,7 +127,7 @@ const Dashboard: NextPage = () => {
     }
   };
 
-  const removeFriend = (friend: any) => {
+  const removeFriend = (friend: PlayerProps) => {
     setFriendsSelected(
       friendsSelected.filter((player) => player.steamid !== friend.steamid)
     );
@@ -100,13 +137,13 @@ const Dashboard: NextPage = () => {
 
   const filterGames = useMemo(() => {
     //////////////////////////////////////////
-    let allgames = games.reduce((acc, obj) => {
+    let allgames: GamesProps[] = games.reduce((acc: any, obj: any) => {
       acc.push(obj.games);
       return acc.flat();
     }, []);
 
     //////////////////////////////////////////
-    const sameGames = allgames.reduce((games, game) => {
+    const sameGames = allgames.reduce((games: any, game: any) => {
       if (
         allgames.filter((el) => game.appid == el.appid).length ==
         friendsSelected.length
@@ -117,11 +154,11 @@ const Dashboard: NextPage = () => {
     }, []);
 
     //////////////////////////////////////////
-    const uniqueGames = Array.from(new Set(sameGames.map((a) => a.appid))).map(
-      (id) => {
-        return sameGames.find((a) => a.appid === id);
-      }
-    );
+    const uniqueGames = Array.from(
+      new Set(sameGames.map((a: any) => a.appid))
+    ).map((id) => {
+      return sameGames.find((a: any) => a.appid === id);
+    });
 
     return uniqueGames;
   }, [games]);
@@ -202,7 +239,7 @@ const Dashboard: NextPage = () => {
                       <PlayerSelected
                         name={friend.personaname}
                         avatar={friend.avatarmedium}
-                        key={friendsSelected.steamid}
+                        key={friend.steamid}
                       >
                         {friend.steamid !== userData.steamid && (
                           <Remove onClick={() => removeFriend(friend)}>

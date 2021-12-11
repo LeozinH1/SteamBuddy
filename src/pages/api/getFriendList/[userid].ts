@@ -13,15 +13,15 @@ export default async function handler(
   //-------------------------------------------------------------------------
 
   const url = `https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=4150CFD1419A127314083A7AE6571226&steamid=${userid}`;
-  let data = await fetch(url);
+  let data: any = await fetch(url);
   data = await data.json();
 
   //-------------------------------------------------------------------------
   // Cria um array somente com o steamid dos amigos
   //-------------------------------------------------------------------------
 
-  let steamids = [];
-  data.friendslist.friends.map((player) => {
+  let steamids: string[] = [];
+  data.friendslist.friends.map((player: any) => {
     steamids.push(player.steamid);
   });
 
@@ -29,8 +29,8 @@ export default async function handler(
   // Separa o array com os steamids em grupos de 100
   //-------------------------------------------------------------------------
 
-  const separar = (itens, maximo: number) => {
-    return itens.reduce((acumulador, item, indice) => {
+  const separar = (itens: any, maximo: number) => {
+    return itens.reduce((acumulador: any, item: any, indice: number) => {
       const grupo = Math.floor(indice / maximo);
       acumulador[grupo] = [...(acumulador[grupo] || []), item];
       return acumulador;
@@ -47,7 +47,7 @@ export default async function handler(
 
   for (let i = 0; i < separado.length; i++) {
     const url2 = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=4150CFD1419A127314083A7AE6571226&steamids=${separado[i]}`;
-    let data2 = await fetch(url2);
+    let data2: any = await fetch(url2);
     data2 = await data2.json();
     fullinfo.push(data2.response.players);
   }

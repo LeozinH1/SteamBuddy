@@ -11,7 +11,7 @@ import Router from "next/router";
 import { useRef } from "react";
 
 const Home: NextPage = () => {
-  const inputRef = useRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement>({} as HTMLInputElement);
 
   const getUserId = async (string: string) => {
     const url_array = string.split("/");
@@ -21,7 +21,7 @@ const Home: NextPage = () => {
 
     const getCustomId = url_array.findIndex((el) => el === "id") + 1;
     if (getCustomId) {
-      let profilesid = await fetch(
+      let profilesid: any = await fetch(
         `api/resolveVanityUrl/${url_array[getCustomId]}`
       );
       profilesid = await profilesid.json();

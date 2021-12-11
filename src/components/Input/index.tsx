@@ -1,10 +1,12 @@
 import React, { InputHTMLAttributes, forwardRef } from "react";
 import { InputStyle } from "./style";
 
-type InputProps = InputHTMLAttributes<HTMLInputElement>;
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  ref?: React.Ref<HTMLInputElement>;
+}
 
 const Input: React.FC<InputProps> = forwardRef(
-  ({ children, ...props }, ref: React.Ref<HTMLInputElement>) => {
+  ({ children, ...props }, ref) => {
     return <InputStyle ref={ref} {...props} />;
   }
 );

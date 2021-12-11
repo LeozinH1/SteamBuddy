@@ -32,7 +32,7 @@ export default async function handler(
   const { userid } = req.query;
 
   const url = `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=4150CFD1419A127314083A7AE6571226&steamids=${userid}`;
-  let data = await fetch(url);
+  let data: any = await fetch(url);
   data = await data.json();
 
   res.status(200).json(data.response.players[0]);
