@@ -61,7 +61,7 @@ const Home: NextPage = () => {
           <p className="about">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc rutrum
             mi at lorem rutrum tempor. Vivamus eget porttitor leo, ut malesuada
-            turpis. Duis at ullamcorper tortor. Pellentesque bibendum urna eu
+            turpis. Duis at ullamcorper tortor. PSellentesque bibendum urna eu
             rhoncus dictum.
           </p>
         </Start>
