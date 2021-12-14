@@ -190,7 +190,7 @@ const Dashboard: NextPage = () => {
   return (
     <>
       <Head>
-        <head>Painel</head>
+        <title>Painel</title>
       </Head>
       <Header />
       <Container>
