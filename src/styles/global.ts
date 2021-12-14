@@ -28,6 +28,10 @@ export default createGlobalStyle`
     }
   }
 
+  label[role='alert']{
+    color: #f74141;
+  }
+
 
   ::-webkit-scrollbar {
     width: 7px;

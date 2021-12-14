@@ -1,14 +1,10 @@
 import type { NextPage } from "next";
-
+import { useRef, useState } from "react";
 import { Wrapper, Start, BubbleBlue, BubbleGreen } from "../styles/pages/index";
-
+import Router from "next/router";
 import Header from "../components/Header";
 import Input from "../components/Input";
 import Button from "../components/Button";
-
-import Router from "next/router";
-
-import { useRef } from "react";
 
 const Home: NextPage = () => {
   const inputRef = useRef<HTMLInputElement>({} as HTMLInputElement);
@@ -29,15 +25,27 @@ const Home: NextPage = () => {
       return profilesid.userid;
     }
 
-    return string;
+    let vanityUrl: any = await fetch(`api/resolveVanityUrl/${string}`);
+    vanityUrl = await vanityUrl.json();
+
+    if (vanityUrl.userid) return vanityUrl.userid;
+
+    throw new Error("Usuário não encontrado");
   };
+
+  const [notFound, setNotFound] = useState(false);
 
   const handleClick = async () => {
     if (inputRef.current) {
       const inputValue = inputRef.current.value;
-      getUserId(inputValue).then((res) => {
-        Router.push(`/${res}`);
-      });
+      getUserId(inputValue)
+        .then((res) => {
+          setNotFound(false);
+          Router.push(`/${res}`);
+        })
+        .catch((err) => {
+          setNotFound(true);
+        });
     }
   };
 
@@ -51,18 +59,21 @@ const Home: NextPage = () => {
 
           <Input
             ref={inputRef}
-            placeholder="https://steamcommunity.com/id/your_id"
+            placeholder="Ex.: https://steamcommunity.com/profiles/76561198198348157"
+            className={notFound ? "error" : ""}
           />
+
+          {notFound && <label role="alert">Usuário não encontrado.</label>}
 
           <Button className="continue" onClick={handleClick}>
             Continuar
           </Button>
 
           <p className="about">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc rutrum
-            mi at lorem rutrum tempor. Vivamus eget porttitor leo, ut malesuada
-            turpis. Duis at ullamcorper tortor. PSellentesque bibendum urna eu
-            rhoncus dictum.
+            Preencha o campo acima com o link ou id do seu perfil steam (Ex.:
+            https://steamcommunity.com/profiles/76561198198348157). Após clicar
+            no botão continuar, selecione os amigos que deseja, o aplicativo irá
+            listar apenas os jogos em comum das pessoas selecionadas.
           </p>
         </Start>
         <BubbleBlue />
