@@ -8,6 +8,7 @@ import Input from "../components/Input";
 import { useRouter } from "next/router";
 import { Wellcome } from "../styles/pages/dashboard";
 import Link from "next/link";
+import Head from "next/head";
 
 import {
   Content,
@@ -188,6 +189,9 @@ const Dashboard: NextPage = () => {
 
   return (
     <>
+      <Head>
+        <head>Painel</head>
+      </Head>
       <Header />
       <Container>
         <Wrapper>

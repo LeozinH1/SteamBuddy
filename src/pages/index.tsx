@@ -5,6 +5,7 @@ import Router from "next/router";
 import Header from "../components/Header";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import Head from "next/head";
 
 const Home: NextPage = () => {
   const inputRef = useRef<HTMLInputElement>({} as HTMLInputElement);
@@ -51,6 +52,9 @@ const Home: NextPage = () => {
 
   return (
     <>
+      <Head>
+        <title>Steam Buddy</title>
+      </Head>
       <Header />
 
       <Wrapper>
