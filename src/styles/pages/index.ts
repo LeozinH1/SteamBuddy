@@ -21,6 +21,17 @@ export const Start = styled.div`
 
   backdrop-filter: blur(10px);
 
+  @media only screen and (max-width: 600px) {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    padding: 30px 5px;
+
+    .continue {
+      align-self: stretch !important;
+    }
+  }
+
   @keyframes startAnim {
     from {
       margin-top: -100px;

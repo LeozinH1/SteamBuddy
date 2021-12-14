@@ -1,14 +1,11 @@
 import type { NextPage } from "next";
 import { useEffect, useState, useMemo } from "react";
-
 import { Container } from "../styles/layout";
 import PlayerSelected from "../components/PlayerSelectedItem";
 import ListItem from "../components/ListItem";
 import Header from "../components/Header";
 import Input from "../components/Input";
-
 import { useRouter } from "next/router";
-
 import { Wellcome } from "../styles/pages/dashboard";
 import Link from "next/link";
 
@@ -40,6 +37,8 @@ interface PlayerProps {
   timecreated: number;
   personastateflags: number;
   loccountrycode: string;
+  gameextrainfo?: string;
+  gameid?: number;
 }
 
 interface GamesProps {
@@ -66,11 +65,18 @@ const Dashboard: NextPage = () => {
 
   const [userData, setUserData] = useState<PlayerProps>({} as PlayerProps);
 
+  const [search, setSearch] = useState("");
+
   const [friendsList, setFriendsList] = useState<PlayerProps[]>(
     [] as PlayerProps[]
   );
+
   const [friendsSelected, setFriendsSelected] = useState<PlayerProps[]>(
     [] as PlayerProps[]
+  );
+
+  const [games, setGames] = useState<CustomGamesProps[]>(
+    [] as CustomGamesProps[]
   );
 
   const getUserData = async (steamid: string) => {
@@ -85,26 +91,11 @@ const Dashboard: NextPage = () => {
     return req;
   };
 
-  useEffect(() => {
-    getUserData(String(router.query.userid)).then((res: any) => {
-      setUserData(res);
-      addFriend(res);
-    });
-
-    getUserFriends(String(router.query.userid)).then((res: any) => {
-      setFriendsList(res);
-    });
-  }, [router]);
-
   const getUserGames = async (steamid: string) => {
     let req = await fetch(`api/getUserGames/${steamid}`);
     req = await req.json();
     return req;
   };
-
-  const [games, setGames] = useState<CustomGamesProps[]>(
-    [] as CustomGamesProps[]
-  );
 
   const addFriend = (friend: PlayerProps) => {
     const exists = friendsSelected.find(
@@ -135,6 +126,30 @@ const Dashboard: NextPage = () => {
     setGames(games.filter((el) => el.steamid !== friend.steamid));
   };
 
+  const compare = (a: any, b: any) => {
+    const player1 = a.personaname.toUpperCase();
+    const player2 = b.personaname.toUpperCase();
+
+    let comparison = 0;
+    if (player1 > player2) {
+      comparison = 1;
+    } else if (player1 < player2) {
+      comparison = -1;
+    }
+    return comparison;
+  };
+
+  useEffect(() => {
+    getUserData(String(router.query.userid)).then((res: any) => {
+      setUserData(res);
+      addFriend(res);
+    });
+
+    getUserFriends(String(router.query.userid)).then((res: any) => {
+      setFriendsList(res);
+    });
+  }, [router]);
+
   const filterGames = useMemo(() => {
     //////////////////////////////////////////
     let allgames: GamesProps[] = games.reduce((acc: any, obj: any) => {
@@ -163,8 +178,6 @@ const Dashboard: NextPage = () => {
     return uniqueGames;
   }, [games]);
 
-  const [search, setSearch] = useState("");
-
   const myfriends = useMemo(() => {
     if (!search) return friendsList;
 
@@ -172,19 +185,6 @@ const Dashboard: NextPage = () => {
       return el.personaname.toLowerCase().includes(search.toLowerCase());
     });
   }, [search, friendsList]);
-
-  const compare = (a: any, b: any) => {
-    const player1 = a.personaname.toUpperCase();
-    const player2 = b.personaname.toUpperCase();
-
-    let comparison = 0;
-    if (player1 > player2) {
-      comparison = 1;
-    } else if (player1 < player2) {
-      comparison = -1;
-    }
-    return comparison;
-  };
 
   return (
     <>
